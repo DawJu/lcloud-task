@@ -25,3 +25,17 @@ def filter_files(filter):
                 print(obj['Key'])
     else:
         print('Found no files.')
+
+def filter_delete_files(filter):
+    response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=bucket_prefix)
+    if 'Contents' in response:
+        regex = re.compile(filter)
+        keys_to_delete = [{'Key': obj['Key']} for obj in response['Contents'] if regex.search(obj['Key'])]
+
+        if keys_to_delete:
+            delete_response = s3_client.delete_objects(Bucket=bucket_name, Delete={'Objects': keys_to_delete})
+            print(f'Deleted files: {delete_response.get('Deleted', [])}')
+        else:
+            print('No files deleted.')
+    else:
+        print('Found no files.')
